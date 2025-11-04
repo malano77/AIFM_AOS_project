@@ -120,4 +120,30 @@ public:
                uint8_t *output_buf);
 };
 
+class DRAMDevice: public FarMemDevice {
+  private:
+    rt::Mutex sizes_mu_;
+    // This map keeps track each object's payload size as the value and the
+    // key is the 64-bit remote address.
+    std::unordered_map<uint64_t, uint16_t> sizes_;
+  public: 
+    // DRAMDevice uses local DRAM to simulate far memory.
+    explicit DRAMDevice(uint64_t far_mem_size)
+      : FarMemDevice(far_mem_size, kPrefetchWinSize) {} // Uses kPrefetchWinSize for the prefetch window size.
+    void read_object(uint8_t ds_id, uint8_t obj_id_len,
+                     const uint8_t *obj_id, uint16_t *data_len,
+                     uint8_t *data_buf) override;
+    void write_object(uint8_t ds_id, uint8_t obj_id_len,
+                      const uint8_t *obj_id, uint16_t data_len,
+                      const uint8_t *data_buf) override;
+    bool remove_object(uint64_t ds_id, uint8_t obj_id_len,
+                       const uint8_t *obj_id) override;
+    void construct(uint8_t /*ds_type*/, uint8_t /*ds_id*/, uint8_t /*param_len*/,
+                   uint8_t* /*params*/) override;
+    void destruct(uint8_t /*ds_id*/) override;
+    void compute(uint8_t /*ds_id*/, uint8_t /*opcode*/, uint16_t /*input_len*/,
+                  const uint8_t* /*input_buf*/, uint16_t* output_len,
+                  uint8_t* /*output_buf*/) override;
+};
+
 } // namespace far_memory

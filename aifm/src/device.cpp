@@ -330,4 +330,70 @@ void TCPDevice::_compute(tcpconn_t *remote_slave, uint8_t ds_id, uint8_t opcode,
   }
 }
 
+void DRAMDevice::read_object(uint8_t ds_id, uint8_t obj_id_len,
+                             const uint8_t *obj_id, uint16_t *data_len,
+                             uint8_t *data_buf) {
+  Stats::start_measure_read_object_cycles();
+  // check obj_id length
+  BUG_ON(obj_id_len != sizeof(uint64_t));
+  // Interpret obj_id as remote address
+  const uint64_t remote = *reinterpret_cast<const uint64_t *>(obj_id);
+
+  // find the len of the object at address remote
+  uint16_t len = 0;
+  {
+    rt::ScopedLock l(size_mu_);
+    auto it = sizes_.find(remote);
+    if (it != sizes_.end()) {
+      len = it->second;
+    }
+  }
+  *data_len = len;
+
+  // check that len != 0 and then copy the data
+  // to the data remote address 
+  if (likely(len)) {
+    auto *src = reinterpret_cast<const void *>(remote + Object::kHeaderSize);
+    __builtin_memcpy(data_buf, src, len);
+  }
+  Stats::finish_measure_read_object_cycles();
+}
+
+void DRAMDevice::write_object(uint8_t /*ds_id*/, uint8_t obj_id_len,
+                              const uint8_t *obj_id, uint16_t data_len,
+                              const uint8_t *data_buf) {
+
+  
+  Stats::start_measure_write_obhect_cycles();
+  assert(obj_id_len == sizeof(uint64_t));
+  uint64_t remote = *reinterpret_cast<const uint64_t*>(obj_id);
+
+  // copy data to remote address
+  auto *dest = reinterpret_cast<void *>(remote + Object::kHeaderSize);
+  std::memcpy(dest, data_buf, data_len);
+
+  // Add the len of the object to the map.
+  {
+    rt::ScopedLock l(sizes_mu_);
+    sizes_[remote] = data_len;
+  }
+  Stats::finish_measure_write_objecct_cycles();
+}
+
+bool DRAMDevice::remove_object(uint64_t /*ds_id*/, uint8_t obj_id_len,
+                               const uint8_t *obj_id) {
+  BUG_ON(obj_id_len != sizeof(uint64_t));
+  const uint64_t *remote = reinterpret_cast<const uint64_t *>(obj_id);
+  rt::ScopedLock l(sizes_mu_);
+  return sizes_.erase(*remote) > 0;
+}
+
+void DRAMDevice::compute(uint8_t /*ds_id*/, uint8_t /*opcode*/, uint16_t /*input_len*/,
+               const uint8_t* /*input_buf*/, uint16_t* output_len,
+               uint8_t* /*output_buf*/) {
+  if (output_len) {
+    *output_len = 0;
+  }
+}
+
 } // namespace far_memory
