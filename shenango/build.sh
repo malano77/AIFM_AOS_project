@@ -1,10 +1,12 @@
 #!/bin/bash
+set -euo pipefail
 
-# default: skip DPDK/RDMA + NIC setup
-NO_NET=${NO_NET:-1} 
-SHENANGO_MAKEFLAGS=""
-if [[ "${NO_NET}" == "1" ]]; then
-  SHENANGO_MAKEFLAGS="DIRECTPATH=0 EXTRA_CFLAGS='-UDIRECTPATH -UMLX4 -UMLX5'"
+NO_NET=${NO_NET:-1}
+
+if [[ "$NO_NET" == "1" ]]; then
+  SHENANGO_ARGS=(DIRECTPATH=0 EXTRA_CFLAGS="-UDIRECTPATH -UMLX4 -UMLX5")
+else
+  SHENANGO_ARGS=()
 fi
 
 cd ksched
@@ -12,24 +14,20 @@ make clean
 make
 cd ..
 
-if [[ "${NO_NET}" != "1" ]]; then
-  ./dpdk.sh || { echo 'Failed to build DPDK.'; exit 1; }
-fi
-
-if [[ "${NO_NET}" != "1" ]]; then
-  ./rdma-core.sh || { echo 'Failed to build RDMA core.'; exit 1; }
-fi
+# skip dpdk/rdma if NO_NET=1
+if [[ "$NO_NET" != "1" ]]; then ./dpdk.sh; fi
+if [[ "$NO_NET" != "1" ]]; then ./rdma-core.sh; fi
 
 make clean
-make -j"$(nproc)" ${SHENANGO_MAKEFLAGS}
+make -j"$(nproc)" "${SHENANGO_ARGS[@]}"
 
 cd bindings/cc
 make clean
-make -j"$(nproc)" ${SHENANGO_MAKEFLAGS}
+make -j"$(nproc)" "${SHENANGO_ARGS[@]}"
 cd ../..
 
-if [[ "${NO_NET}" != "1" ]]; then
-  sudo ./scripts/setup_machine.sh || { echo 'Failed to setup Shenango.'; exit 1; }
+if [[ "$NO_NET" != "1" ]]; then
+  sudo ./scripts/setup_machine.sh
 else
   echo "[info] Skipping NIC/DPDK setup (NO_NET=1)."
 fi
