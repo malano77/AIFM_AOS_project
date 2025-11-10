@@ -6,12 +6,12 @@ endif
 
 # build configuration options (set to y for "yes", n for "no")
 CONFIG_CX5=n
-CONFIG_CX4=y
+CONFIG_CX4=n
 CONFIG_CX3=n
 CONFIG_SPDK=n
 CONFIG_DEBUG=n
 CONFIG_NATIVE=y
-CONFIG_DIRECTPATH=y
+CONFIG_DIRECTPATH=n
 
 # shared toolchain definitions
 INC = -I$(SHENANGO_PATH)/inc
