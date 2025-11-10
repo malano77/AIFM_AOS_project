@@ -2,7 +2,7 @@
 
 # Shenango
 cd shenango
-./build.sh || { echo 'Failed to build Shenango.'; exit 1; }
+NO_NET=1 ./build.sh || { echo 'Failed to build Shenango.'; exit 1; }
 cd ..
 
 # AIFM
