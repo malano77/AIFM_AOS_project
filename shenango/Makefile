@@ -4,6 +4,11 @@ include shared.mk
 DPDK_PATH = dpdk
 CHECKFLAGS = -D__CHECKER__ -Waddress-space
 
+CFLAGS = -mssse3
+CFLAGS += -D_GNU_SOURCE
+CFLAGS += -I./inc
+CFLAGS += -I./dpdk/build/include
+
 ifneq ($(TCP_RX_STATS),)
 CFLAGS += -DTCP_RX_STATS
 endif

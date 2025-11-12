@@ -1,7 +1,8 @@
 /*
  * control.c - the control-plane for the I/O kernel
  */
-
+#include <sched.h>
+#include <sys/socket.h>
 #include <fcntl.h>
 #include <pthread.h>
 #include <stdio.h>

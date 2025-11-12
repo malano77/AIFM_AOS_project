@@ -24,4 +24,4 @@ fi
 
 # Configure/compile dpdk
 make -C dpdk/ config T=x86_64-native-linuxapp-gcc
-make -C dpdk/ -j
+make -C dpdk/ -j2

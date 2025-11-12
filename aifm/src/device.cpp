@@ -395,4 +395,13 @@ void DRAMDevice::compute(uint8_t /*ds_id*/, uint8_t /*opcode*/, uint16_t /*input
 	}
 }
 
+void DRAMDevice::construct(uint8_t /*ds_type*/, uint8_t /*ds_id*/,
+                           uint8_t /*param_len*/, uint8_t* /*params*/) {
+  // No-op for DRAM-only mode
+}
+
+void DRAMDevice::destruct(uint8_t /*ds_id*/) {
+  // No-op for DRAM-only mode
+}
+
 } // namespace far_memory
