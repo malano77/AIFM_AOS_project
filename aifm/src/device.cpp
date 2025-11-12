@@ -339,7 +339,7 @@ void DRAMDevice::read_object(uint8_t ds_id, uint8_t obj_id_len, const uint8_t *o
 
 	uint16_t len = 0;
 	{
-		rt::ScopedLock l(sizes_mu_);
+		rt::ScopedLock l(&sizes_mu_);
 		auto it = sizes_.find(remote);
 		if (it != sizes_.end()) {
 			len = it->second;
@@ -366,7 +366,7 @@ void DRAMDevice::write_object(uint8_t /*ds_id*/, uint8_t obj_id_len, const uint8
 	__builtin_memcpy(dest, data_buf, data_len);
 
 	{
-		rt::ScopedLock l(sizes_mu_);
+		rt::ScopedLock l(&sizes_mu_);
 		sizes_[remote] = data_len;
 	}
 
@@ -378,7 +378,7 @@ bool DRAMDevice::remove_object(uint64_t /*ds_id*/, uint8_t obj_id_len, const uin
 	uint64_t remote;
 	__builtin_memcpy(&remote, obj_id, sizeof(remote));
 
-	rt::ScopedLock l(sizes_mu_);
+	rt::ScopedLock l(&sizes_mu_);
 	return sizes_.erase(remote) != 0;
 }
 
