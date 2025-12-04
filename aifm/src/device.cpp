@@ -330,10 +330,6 @@ void TCPDevice::_compute(tcpconn_t *remote_slave, uint8_t ds_id, uint8_t opcode,
   }
 }
 
-void construct(uint8_t /*ds_type*/, uint8_t /*ds_id*/, uint8_t /*param_len*/, uint8_t* /*params*/) {
-
-}
-void DRAMDevice::destruct(unsigned char)
 
    
 void DRAMDevice::read_object(uint8_t ds_id, uint8_t obj_id_len, const uint8_t *obj_id, uint16_t *data_len, uint8_t *data_buf) {

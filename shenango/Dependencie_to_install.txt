@@ -1,0 +1,5 @@
+sudo apt update
+sudo apt install uuid-dev
+sudo apt install libaio-dev
+sudo apt-get install libssl-dev
+sudo apt-get install libcunit1-dev
