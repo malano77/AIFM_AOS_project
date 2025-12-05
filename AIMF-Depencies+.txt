@@ -44,3 +44,5 @@ cd ../shenango
 ./dpdk.sh
 cd ..
 ./build_all.sh
+cd shenango
+sudo ./scripts/setup_machine.sh
