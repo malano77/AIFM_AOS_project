@@ -51,7 +51,7 @@ void GCParallelizer::master_fn() {
 FarMemManager::FarMemManager(uint64_t cache_size, uint64_t far_mem_size,
                              uint32_t num_gc_threads, FarMemDevice *device)
     : cache_region_manager_(cache_size, true),
-      far_mem_region_manager_(far_mem_size, false), device_ptr_(device),
+      far_mem_region_manager_(far_mem_size, true), device_ptr_(device),
       parallel_marker_(num_gc_threads, kGCSlaveThreadTaskQueueDepth,
                        &from_regions_),
       parallel_write_backer_(num_gc_threads, kGCSlaveThreadTaskQueueDepth,

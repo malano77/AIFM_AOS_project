@@ -8,6 +8,8 @@ extern "C" {
 #include "server.hpp"
 #include "shared_pool.hpp"
 
+#include "sync.h"
+
 namespace far_memory {
 
 class FarMemDevice {
@@ -118,6 +120,22 @@ public:
   void compute(uint8_t ds_id, uint8_t opcode, uint16_t input_len,
                const uint8_t *input_buf, uint16_t *output_len,
                uint8_t *output_buf);
+};
+
+class DRAMDevice: public FarMemDevice {
+  private:
+    constexpr static uint32_t kPrefetchWinSize = 1 << 20;
+    rt::Mutex sizes_mu_;
+    // This map keeps track each object's payload size as the value and the key is the 64-bit remote address.
+    std::unordered_map<uint64_t, uint16_t> sizes_;
+  public:
+    DRAMDevice(uint64_t far_mem_size) : FarMemDevice(far_mem_size, kPrefetchWinSize) {}
+    void read_object(uint8_t ds_id, uint8_t obj_id_len, const uint8_t *obj_id, uint16_t *data_len, uint8_t *data_buf);
+    void write_object(uint8_t ds_id, uint8_t obj_id_len, const uint8_t *obj_id, uint16_t data_len, const uint8_t *data_buf);
+    bool remove_object(uint64_t ds_id, uint8_t obj_id_len, const uint8_t *obj_id);
+    void construct(uint8_t /*ds_type*/, uint8_t /*ds_id*/, uint8_t /*param_len*/, uint8_t* /*params*/);
+    void destruct(uint8_t /*ds_id*/);
+    void compute(uint8_t /*ds_id*/, uint8_t /*opcode*/, uint16_t /*input_len*/, const uint8_t* /*input_buf*/, uint16_t* output_len, uint8_t* /*output_buf*/);
 };
 
 } // namespace far_memory
