@@ -145,6 +145,7 @@ private:
   void stop_prioritizing();
   uint8_t allocate_ds_id();
   void free_ds_id(uint8_t ds_id);
+  uint64_t encode_remote_object_id(uint64_t raw_remote_addr) const;
 
 public:
   using WriteObjectFn = std::function<void(uint32_t data_len)>;
