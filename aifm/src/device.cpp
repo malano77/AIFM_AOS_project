@@ -336,17 +336,23 @@ void DRAMDevice::construct(uint8_t /*ds_type*/, uint8_t /*ds_id*/, uint8_t /*par
 void DRAMDevice::destruct(uint8_t /*ds_id*/) {
 }
 
+void DRAMDevice::set_local_region(uint8_t *base) {
+	BUG_ON(!base);
+	local_region_base_ = base;
+}
+
 void DRAMDevice::read_object(uint8_t ds_id, uint8_t obj_id_len, const uint8_t *obj_id, uint16_t *data_len, uint8_t *data_buf) {
     // Stats::start_measure_read_object_cycles();
 
 	BUG_ON(obj_id_len != sizeof(uint64_t));
-	uint64_t remote;
-	__builtin_memcpy(&remote, obj_id, sizeof(remote));
+	uint64_t remote_offset;
+	__builtin_memcpy(&remote_offset, obj_id, sizeof(remote_offset));
+	BUG_ON(!local_region_base_);
 
 	uint16_t len = 0;
 	{
 		rt::ScopedLock l(&sizes_mu_);
-		auto it = sizes_.find(remote);
+		auto it = sizes_.find(remote_offset);
 		if (it != sizes_.end()) {
 			len = it->second;
 		}
@@ -354,7 +360,7 @@ void DRAMDevice::read_object(uint8_t ds_id, uint8_t obj_id_len, const uint8_t *o
 	*data_len = len;
 
 	if (likely(len)) {
-		const void* src = reinterpret_cast<const void*>(remote + Object::kHeaderSize);
+		const void* src = reinterpret_cast<const void*>(local_region_base_ + remote_offset + Object::kHeaderSize);
 		__builtin_memcpy(data_buf, src, len);
 	}
     
@@ -365,15 +371,16 @@ void DRAMDevice::write_object(uint8_t /*ds_id*/, uint8_t obj_id_len, const uint8
 	// Stats::start_measure_write_object_cycles();
 
 	BUG_ON(obj_id_len != sizeof(uint64_t));
-	uint64_t remote;
-	__builtin_memcpy(&remote, obj_id, sizeof(remote));
+	uint64_t remote_offset;
+	__builtin_memcpy(&remote_offset, obj_id, sizeof(remote_offset));
+	BUG_ON(!local_region_base_);
 
-	auto *dest = reinterpret_cast<void *>(remote + Object::kHeaderSize);
+	auto *dest = reinterpret_cast<void *>(local_region_base_ + remote_offset + Object::kHeaderSize);
 	__builtin_memcpy(dest, data_buf, data_len);
 
 	{
 		rt::ScopedLock l(&sizes_mu_);
-		sizes_[remote] = data_len;
+		sizes_[remote_offset] = data_len;
 	}
 
 	// Stats::finish_measure_write_object_cycles();
@@ -381,11 +388,11 @@ void DRAMDevice::write_object(uint8_t /*ds_id*/, uint8_t obj_id_len, const uint8
 
 bool DRAMDevice::remove_object(uint64_t /*ds_id*/, uint8_t obj_id_len, const uint8_t *obj_id) {
 	BUG_ON(obj_id_len != sizeof(uint64_t));
-	uint64_t remote;
-	__builtin_memcpy(&remote, obj_id, sizeof(remote));
+	uint64_t remote_offset;
+	__builtin_memcpy(&remote_offset, obj_id, sizeof(remote_offset));
 
 	rt::ScopedLock l(&sizes_mu_);
-	return sizes_.erase(remote) != 0;
+	return sizes_.erase(remote_offset) != 0;
 }
 
 void DRAMDevice::compute(uint8_t /*ds_id*/, uint8_t /*opcode*/, uint16_t /*input_len*/, const uint8_t* /*input_buf*/, uint16_t* output_len, uint8_t* /*output_buf*/) {

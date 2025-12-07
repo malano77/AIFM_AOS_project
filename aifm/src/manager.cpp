@@ -60,6 +60,16 @@ FarMemManager::FarMemManager(uint64_t cache_size, uint64_t far_mem_size,
 
   BUG_ON(far_mem_size >= (1ULL << FarMemPtrMeta::kObjectIDBitSize));
 
+  far_mem_is_local_ = far_mem_region_manager_.is_local();
+  far_mem_local_base_addr_ =
+      far_mem_is_local_
+          ? reinterpret_cast<uint64_t>(far_mem_region_manager_.get_local_buf())
+          : 0;
+  if (auto dram_device = dynamic_cast<DRAMDevice *>(device_ptr_.get())) {
+    BUG_ON(!far_mem_is_local_);
+    dram_device->set_local_region(far_mem_region_manager_.get_local_buf());
+  }
+
   ksched_fd_ = open("/dev/ksched", O_RDWR);
   if (ksched_fd_ < 0) {
     LOG_PRINTF("%s\n", "Warn: fail to open /dev/ksched.");
@@ -100,9 +110,10 @@ bool FarMemManager::allocate_generic_unique_ptr_nb(
   ptr->init(local_object_addr);
   if (!optional_id_len) {
     auto remote_object_addr = allocate_remote_object(false, object_size);
+    auto remote_object_id = encode_remote_object_id(remote_object_addr);
     Object(local_object_addr, ds_id, static_cast<uint16_t>(item_size),
-           static_cast<uint8_t>(sizeof(remote_object_addr)),
-           reinterpret_cast<const uint8_t *>(&remote_object_addr));
+           static_cast<uint8_t>(sizeof(remote_object_id)),
+           reinterpret_cast<const uint8_t *>(&remote_object_id));
   } else {
     Object(local_object_addr, ds_id, static_cast<uint16_t>(item_size),
            *optional_id_len, *optional_id);
@@ -122,9 +133,10 @@ GenericUniquePtr FarMemManager::allocate_generic_unique_ptr(
   auto ptr = GenericUniquePtr(local_object_addr);
   if (!optional_id_len) {
     auto remote_object_addr = allocate_remote_object(false, object_size);
+    auto remote_object_id = encode_remote_object_id(remote_object_addr);
     Object(local_object_addr, ds_id, static_cast<uint16_t>(item_size),
-           static_cast<uint8_t>(sizeof(remote_object_addr)),
-           reinterpret_cast<const uint8_t *>(&remote_object_addr));
+           static_cast<uint8_t>(sizeof(remote_object_id)),
+           reinterpret_cast<const uint8_t *>(&remote_object_id));
   } else {
     Object(local_object_addr, ds_id, static_cast<uint16_t>(item_size),
            *optional_id_len, *optional_id);
@@ -219,7 +231,8 @@ FarMemManagerFactory::build(uint64_t cache_size,
   return ptr_;
 }
 
-FarMemManager::RegionManager::RegionManager(uint64_t size, bool is_local) {
+FarMemManager::RegionManager::RegionManager(uint64_t size, bool is_local)
+    : is_local_(is_local) {
   auto free_regions_count = ceil(size / static_cast<double>(Region::kSize));
   if (free_regions_count <= 2 * helpers::kNumSocket1CPUs) {
     LOG_PRINTF("%s\n", "Error: two few available regions.");
@@ -724,6 +737,15 @@ retry_allocate_far_mem:
   return *optional_remote_addr;
 }
 
+uint64_t
+FarMemManager::encode_remote_object_id(uint64_t raw_remote_addr) const {
+  if (!far_mem_is_local_) {
+    return raw_remote_addr;
+  }
+  assert(raw_remote_addr >= far_mem_local_base_addr_);
+  return raw_remote_addr - far_mem_local_base_addr_;
+}
+
 void FarMemManager::mutator_wait_for_gc_cache() {
   assert(preempt_enabled());
   gc_lock_.Lock();
@@ -800,10 +822,11 @@ bool FarMemManager::reallocate_generic_unique_ptr_nb(const DerefScope &scope,
   ptr->init(local_object_addr);
   if (old_obj_ds_id == kVanillaPtrDSID) {
     auto remote_object_addr = allocate_remote_object(false, new_obj_size);
+    auto remote_object_id = encode_remote_object_id(remote_object_addr);
     assert(old_obj_id_len == kVanillaPtrObjectIDSize);
     Object(local_object_addr, old_obj_ds_id,
            static_cast<uint16_t>(new_item_size), kVanillaPtrObjectIDSize,
-           reinterpret_cast<const uint8_t *>(&remote_object_addr));
+           reinterpret_cast<const uint8_t *>(&remote_object_id));
   } else {
     Object(local_object_addr, old_obj_ds_id,
            static_cast<uint16_t>(new_item_size), old_obj_id_len,

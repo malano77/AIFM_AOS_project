@@ -10,6 +10,8 @@ extern "C" {
 
 #include "sync.h"
 
+#include <unordered_map>
+
 namespace far_memory {
 
 class FarMemDevice {
@@ -128,8 +130,10 @@ class DRAMDevice: public FarMemDevice {
     rt::Mutex sizes_mu_;
     // This map keeps track each object's payload size as the value and the key is the 64-bit remote address.
     std::unordered_map<uint64_t, uint16_t> sizes_;
+    uint8_t *local_region_base_ = nullptr;
   public:
     DRAMDevice(uint64_t far_mem_size) : FarMemDevice(far_mem_size, kPrefetchWinSize) {}
+    void set_local_region(uint8_t *base);
     void read_object(uint8_t ds_id, uint8_t obj_id_len, const uint8_t *obj_id, uint16_t *data_len, uint8_t *data_buf) override;
     void write_object(uint8_t ds_id, uint8_t obj_id_len, const uint8_t *obj_id, uint16_t data_len, const uint8_t *data_buf) override;
     bool remove_object(uint64_t ds_id, uint8_t obj_id_len, const uint8_t *obj_id) override;

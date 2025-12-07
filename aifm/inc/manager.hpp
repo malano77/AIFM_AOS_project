@@ -70,6 +70,7 @@ private:
     constexpr static double kPickRegionMaxRetryTimes = 3;
 
     std::unique_ptr<uint8_t> local_cache_ptr_;
+    bool is_local_;
     CircularBuffer<Region, false> free_regions_;
     CircularBuffer<Region, false> used_regions_;
     CircularBuffer<Region, false> nt_used_regions_;
@@ -84,12 +85,16 @@ private:
     std::optional<Region> pop_used_region();
     bool try_refill_core_local_free_region(bool nt, Region *full_region);
     Region &core_local_free_region(bool nt);
+    bool is_local() const { return is_local_; }
+    uint8_t *get_local_buf() const { return local_cache_ptr_.get(); }
     double get_free_region_ratio() const;
     uint32_t get_num_regions() const;
   };
 
   RegionManager cache_region_manager_;
   RegionManager far_mem_region_manager_;
+  bool far_mem_is_local_ = false;
+  uint64_t far_mem_local_base_addr_ = 0;
   std::atomic<uint32_t> pending_gcs_{0};
   bool gc_master_spawned_;
   std::unique_ptr<FarMemDevice> device_ptr_;
