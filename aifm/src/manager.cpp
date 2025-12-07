@@ -737,7 +737,7 @@ retry_allocate_far_mem:
   return *optional_remote_addr;
 }
 
-const uint64_t FarMemManager::encode_remote_object_id(uint64_t raw_remote_addr) {
+uint64_t FarMemManager::encode_remote_object_id(uint64_t raw_remote_addr) const {
   if (!far_mem_is_local_) {
     return raw_remote_addr;
   }
