@@ -18,7 +18,7 @@ public:
   static void record(uint64_t object_id);
   static std::vector<Entry> snapshot();
   static void reset();
-  static void dump_top(const char *label, size_t max_entries = 8);
+  static void dump_top(const char *label, size_t max_entries = 16);
 
 private:
   struct ThreadLocalCounters {
