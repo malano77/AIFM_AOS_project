@@ -11,7 +11,7 @@ sudo chmod a+rw /mnt
 cd /mnt
 
 # Download ucompressed input.
-wget http://cs.fit.edu/~mmahoney/compression/enwik9.zip
+wget http://mattmahoney.net/dc/enwik9.zip
 unzip enwik9.zip
 mv enwik9 enwik9.uncompressed
 
