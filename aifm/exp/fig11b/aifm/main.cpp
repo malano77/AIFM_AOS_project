@@ -8,6 +8,7 @@ extern "C" {
 #include "deref_scope.hpp"
 #include "device.hpp"
 #include "helpers.hpp"
+#include "hotness_tracker.hpp"
 #include "manager.hpp"
 #include "stats.hpp"
 
@@ -112,11 +113,10 @@ void fm_uncompress_files_bench(const string &in_file_path,
   // write_file_to_string(out_file_path, out_str);
 }
 
-void do_work(netaddr raddr) {
+void do_work() {
   std::unique_ptr<FarMemManager> manager =
       std::unique_ptr<FarMemManager>(FarMemManagerFactory::build(
-          kCacheSize, kNumGCThreads,
-          new TCPDevice(raddr, kNumConnections, kFarMemSize)));
+          kCacheSize, kNumGCThreads, new DRAMDevice(kFarMemSize)));
   for (uint32_t i = 0; i < kNumCompressedFiles; i++) {
     fm_array_ptrs[i].reset(
         manager->allocate_array_heap<snappy::FileBlock,
@@ -125,6 +125,8 @@ void do_work(netaddr raddr) {
 
   fm_uncompress_files_bench("/mnt/enwik9.compressed",
                             "/mnt/enwik9.uncompressed.tmp");
+  HotnessTracker::dump_top("snappy");
+  HotnessTracker::reset();
 
   std::cout << "Force existing..." << std::endl;
   exit(0);
@@ -132,27 +134,17 @@ void do_work(netaddr raddr) {
 
 int argc;
 void my_main(void *arg) {
-  char **argv = (char **)arg;
-  std::string ip_addr_port(argv[1]);
-  do_work(helpers::str_to_netaddr(ip_addr_port));
+  (void)arg;
+  do_work();
 }
 
 int main(int _argc, char *argv[]) {
-  int ret;
-
-  if (_argc < 3) {
-    std::cerr << "usage: [cfg_file] [ip_addr:port]" << std::endl;
+  if (_argc < 2) {
+    std::cerr << "usage: [cfg_file]" << std::endl;
     return -EINVAL;
   }
 
-  char conf_path[strlen(argv[1]) + 1];
-  strcpy(conf_path, argv[1]);
-  for (int i = 2; i < _argc; i++) {
-    argv[i - 1] = argv[i];
-  }
-  argc = _argc - 1;
-
-  ret = runtime_init(conf_path, my_main, argv);
+  int ret = runtime_init(argv[1], my_main, argv);
   if (ret) {
     std::cerr << "failed to start runtime" << std::endl;
     return ret;
