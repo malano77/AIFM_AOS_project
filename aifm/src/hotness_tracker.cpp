@@ -89,8 +89,8 @@ void HotnessTracker::dump_top(const char *label, size_t max_entries) {
     printf("[HotnessTracker] %s: no accesses recorded.\n", label);
     return;
   }
-  printf("[HotnessTracker] %s: top %zu objects\n", label,
-         std::min(max_entries, entries.size()));
+  printf("[HotnessTracker] %s: top %zu objects out of %zu total\n", label,
+         std::min(max_entries, entries.size()), entries.size());
   for (size_t i = 0; i < entries.size() && i < max_entries; i++) {
     printf("  #%zu object_id=0x%lx accesses=%lu\n", i + 1,
            entries[i].object_id, entries[i].accesses);
