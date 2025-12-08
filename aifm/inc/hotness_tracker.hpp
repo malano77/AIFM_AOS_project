@@ -26,7 +26,7 @@ private:
     ~ThreadLocalCounters();
     void inc(uint64_t object_id);
     void clear();
-
+    rt::Spin lock;
     std::unordered_map<uint64_t, uint64_t> counts;
   };
 

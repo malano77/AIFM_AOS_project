@@ -15,10 +15,16 @@ HotnessTracker::ThreadLocalCounters::~ThreadLocalCounters() {
 }
 
 void HotnessTracker::ThreadLocalCounters::inc(uint64_t object_id) {
+  lock.Lock();
   counts[object_id]++;
+  lock.Unlock();
 }
 
-void HotnessTracker::ThreadLocalCounters::clear() { counts.clear(); }
+void HotnessTracker::ThreadLocalCounters::clear() { 
+  lock.Lock();
+  counts.clear(); 
+  lock.Unlock();
+}
 
 HotnessTracker::ThreadLocalCounters &HotnessTracker::tls() {
   thread_local ThreadLocalCounters tls_instance;
@@ -41,14 +47,19 @@ void HotnessTracker::unregister_tls(ThreadLocalCounters *tls_ptr) {
 void HotnessTracker::record(uint64_t object_id) { tls().inc(object_id); }
 
 std::vector<HotnessTracker::Entry> HotnessTracker::snapshot() {
-  std::unordered_map<uint64_t, uint64_t> aggregated;
+  std::vector<ThreadLocalCounters*> regs;
   registry_lock_.Lock();
-  for (auto *tls_ptr : registry_) {
+  regs = registry_;
+  registry_lock_.Unlock();
+
+  std::unordered_map<uint64_t, uint64_t> aggregated;
+  for (auto *tls_ptr : regs) {
+    tls_ptr->lock.Lock();
     for (const auto &kv : tls_ptr->counts) {
       aggregated[kv.first] += kv.second;
     }
+    tls_ptr->lock.Unlock();
   }
-  registry_lock_.Unlock();
 
   std::vector<Entry> entries;
   entries.reserve(aggregated.size());
@@ -63,11 +74,13 @@ std::vector<HotnessTracker::Entry> HotnessTracker::snapshot() {
 }
 
 void HotnessTracker::reset() {
+  std::vector<ThreadLocalCounters*> regs;
   registry_lock_.Lock();
-  for (auto *tls_ptr : registry_) {
+  regs = registry_;
+  registry_lock_.Unlock();
+  for (auto *tls_ptr : regs) {
     tls_ptr->clear();
   }
-  registry_lock_.Unlock();
 }
 
 void HotnessTracker::dump_top(const char *label, size_t max_entries) {
