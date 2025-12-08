@@ -1,6 +1,7 @@
 #pragma once
 
 #include "deref_scope.hpp"
+#include "hotness_tracker.hpp"
 #include "object.hpp"
 
 namespace far_memory {

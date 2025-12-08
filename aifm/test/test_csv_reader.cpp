@@ -8,6 +8,7 @@ extern "C" {
 #include "device.hpp"
 #include "helpers.hpp"
 #include "manager.hpp"
+#include "hotness_tracker.hpp"
 
 #include <cstdlib>
 #include <cstring>
@@ -66,6 +67,8 @@ public:
             9.95) < 1E-5);
 
     cout << "Passed" << endl;
+    HotnessTracker::dump_top("test_csv_reader");
+    HotnessTracker::reset();
     return;
   }
 };

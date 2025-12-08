@@ -213,8 +213,10 @@ retry:
   }
 
   // 4) shrq.
-  return reinterpret_cast<void *>(metadata >>
-                                  FarMemPtrMeta::kObjectDataAddrBitPos);
+  auto obj_data_addr =
+      metadata >> FarMemPtrMeta::kObjectDataAddrBitPos;
+  HotnessTracker::record(meta().get_object_id());
+  return reinterpret_cast<void *>(obj_data_addr);
 }
 
 template <bool Shared>

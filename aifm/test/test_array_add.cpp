@@ -4,6 +4,7 @@ extern "C" {
 
 #include "array.hpp"
 #include "device.hpp"
+#include "hotness_tracker.hpp"
 #include "manager.hpp"
 
 #include <cstdint>
@@ -73,10 +74,14 @@ void do_work(FarMemManager *manager) {
   }
 
   cout << "Passed" << endl;
+  HotnessTracker::dump_top("test_array_add");
+  HotnessTracker::reset();
   return;
 
 fail:
   cout << "Failed" << endl;
+  HotnessTracker::dump_top("test_array_add");
+  HotnessTracker::reset();
   return;
 }
 

@@ -6,6 +6,7 @@ extern "C" {
 #include "deref_scope.hpp"
 #include "device.hpp"
 #include "manager.hpp"
+#include "hotness_tracker.hpp"
 
 #include <cstdlib>
 #include <cstring>
@@ -90,10 +91,14 @@ void do_work(FarMemManager *manager) {
   }
 
   cout << "Passed" << endl;
+  HotnessTracker::dump_top("test_pointer_concurrent");
+  HotnessTracker::reset();
   return;
 
 fail:
   cout << "Failed" << endl;
+  HotnessTracker::dump_top("test_pointer_concurrent");
+  HotnessTracker::reset();
   return;
 }
 
