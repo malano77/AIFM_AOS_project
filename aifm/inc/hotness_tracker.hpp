@@ -37,8 +37,6 @@ private:
 
   static rt::Spin registry_lock_;
   static std::vector<ThreadLocalCounters *> registry_;
-  static uint64_t far_mem_base_addr_;
-  static bool far_mem_base_set_;
 };
 
 } // namespace far_memory

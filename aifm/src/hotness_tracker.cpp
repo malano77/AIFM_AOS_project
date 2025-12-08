@@ -7,8 +7,6 @@ namespace far_memory {
 
 rt::Spin HotnessTracker::registry_lock_;
 std::vector<HotnessTracker::ThreadLocalCounters *> HotnessTracker::registry_;
-uint64_t HotnessTracker::far_mem_base_addr_ = 0;
-bool HotnessTracker::far_mem_base_set_ = false;
 
 HotnessTracker::ThreadLocalCounters::ThreadLocalCounters() { register_tls(this); }
 
@@ -91,31 +89,10 @@ void HotnessTracker::dump(const char *label) {
     printf("[HotnessTracker] %s: no accesses recorded.\n", label);
     return;
   }
-  if (far_mem_base_set_) {
-    printf("[HotnessTracker] %s: far_mem_base=0x%lx\n", label,
-           far_mem_base_addr_);
-  }
   printf("[HotnessTracker] %s: %zu total objects\n", label, entries.size());
   for (size_t i = 0; i < entries.size(); i++) {
-    if (far_mem_base_set_) {
-      printf("  #%zu offset=0x%lx actual=0x%lx accesses=%lu\n", i + 1,
-             entries[i].object_id,
-             far_mem_base_addr_ + entries[i].object_id,
-             entries[i].accesses);
-    } else {
-      printf("  #%zu object_id=0x%lx accesses=%lu\n", i + 1,
-             entries[i].object_id, entries[i].accesses);
-    }
-  }
-}
-
-void HotnessTracker::set_far_mem_base(uint8_t *base_addr) {
-  if (base_addr) {
-    far_mem_base_addr_ = reinterpret_cast<uint64_t>(base_addr);
-    far_mem_base_set_ = true;
-  } else {
-    far_mem_base_set_ = false;
-    far_mem_base_addr_ = 0;
+    printf("  #%zu object_id=0x%lx accesses=%lu\n", i + 1,
+            entries[i].object_id, entries[i].accesses);
   }
 }
 
