@@ -19,6 +19,7 @@ public:
   static std::vector<Entry> snapshot();
   static void reset();
   static void dump_top(const char *label, size_t max_entries = 16);
+  static void set_far_mem_base(uint8_t *base_addr);
 
 private:
   struct ThreadLocalCounters {
@@ -36,6 +37,8 @@ private:
 
   static rt::Spin registry_lock_;
   static std::vector<ThreadLocalCounters *> registry_;
+  static uint64_t far_mem_base_addr_;
+  static bool far_mem_base_set_;
 };
 
 } // namespace far_memory

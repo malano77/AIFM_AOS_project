@@ -12,6 +12,7 @@ extern "C" {
 
 #include "deref_scope.hpp"
 #include "manager.hpp"
+#include "hotness_tracker.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -65,6 +66,11 @@ FarMemManager::FarMemManager(uint64_t cache_size, uint64_t far_mem_size,
       far_mem_is_local_
           ? reinterpret_cast<uint64_t>(far_mem_region_manager_.get_local_buf())
           : 0;
+  if (far_mem_is_local_) {
+    HotnessTracker::set_far_mem_base(far_mem_region_manager_.get_local_buf());
+  } else {
+    HotnessTracker::set_far_mem_base(nullptr);
+  }
   if (auto dram_device = dynamic_cast<DRAMDevice *>(device_ptr_.get())) {
     BUG_ON(!far_mem_is_local_);
     dram_device->set_local_region(far_mem_region_manager_.get_local_buf());
