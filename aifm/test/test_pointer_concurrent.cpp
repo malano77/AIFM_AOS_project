@@ -91,13 +91,13 @@ void do_work(FarMemManager *manager) {
   }
 
   cout << "Passed" << endl;
-  HotnessTracker::dump_top("test_pointer_concurrent");
+  HotnessTracker::dump("test_pointer_concurrent");
   HotnessTracker::reset();
   return;
 
 fail:
   cout << "Failed" << endl;
-  HotnessTracker::dump_top("test_pointer_concurrent");
+  HotnessTracker::dump("test_pointer_concurrent");
   HotnessTracker::reset();
   return;
 }

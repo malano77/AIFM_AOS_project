@@ -85,7 +85,7 @@ void HotnessTracker::reset() {
   }
 }
 
-void HotnessTracker::dump_top(const char *label, size_t max_entries) {
+void HotnessTracker::dump(const char *label) {
   auto entries = snapshot();
   if (entries.empty()) {
     printf("[HotnessTracker] %s: no accesses recorded.\n", label);

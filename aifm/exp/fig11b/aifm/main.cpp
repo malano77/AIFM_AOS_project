@@ -125,7 +125,7 @@ void do_work() {
 
   fm_uncompress_files_bench("/mnt/enwik9.compressed",
                             "/mnt/enwik9.uncompressed.tmp");
-  HotnessTracker::dump_top("snappy");
+  HotnessTracker::dump("snappy");
   HotnessTracker::reset();
 
   std::cout << "Force existing..." << std::endl;

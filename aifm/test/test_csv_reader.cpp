@@ -67,7 +67,7 @@ public:
             9.95) < 1E-5);
 
     cout << "Passed" << endl;
-    HotnessTracker::dump_top("test_csv_reader");
+    HotnessTracker::dump("test_csv_reader");
     HotnessTracker::reset();
     return;
   }

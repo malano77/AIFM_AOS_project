@@ -74,13 +74,13 @@ void do_work(FarMemManager *manager) {
   }
 
   cout << "Passed" << endl;
-  HotnessTracker::dump_top("test_array_add");
+  HotnessTracker::dump("test_array_add");
   HotnessTracker::reset();
   return;
 
 fail:
   cout << "Failed" << endl;
-  HotnessTracker::dump_top("test_array_add");
+  HotnessTracker::dump("test_array_add");
   HotnessTracker::reset();
   return;
 }
