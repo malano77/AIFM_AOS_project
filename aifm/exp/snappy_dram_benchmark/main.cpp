@@ -39,21 +39,22 @@ namespace far_memory {
 class FarMemTest {
 private:
   // FarMemManager.
-  constexpr static uint64_t kCacheSize = 2048 * Region::kSize;
-  constexpr static uint64_t kFarMemSize = (10ULL << 30); // 10 GB
+  constexpr static uint64_t kCacheSize = 256 * Region::kSize; // 512MB (assuming 2MB regions)
+  constexpr static uint64_t kFarMemSize = (2ULL << 30); // 2 GB
   constexpr static uint32_t kNumGCThreads = 12;
 
   // Hashtable.
   constexpr static uint32_t kKeyLen = 12;
   constexpr static uint32_t kValueLen = 4;
-  constexpr static uint32_t kLocalHashTableNumEntriesShift = 28;
-  constexpr static uint32_t kRemoteHashTableNumEntriesShift = 28;
-  constexpr static uint64_t kRemoteHashTableSlabSize = (4ULL << 30) * 1.05;
-  constexpr static uint32_t kNumKVPairs = 1 << 20; // Reduced for DRAM test speed
+  constexpr static uint32_t kLocalHashTableNumEntriesShift = 25; // Reduced from 28
+  constexpr static uint32_t kRemoteHashTableNumEntriesShift = 25; // Reduced from 28
+  constexpr static uint64_t kRemoteHashTableSlabSize = (1ULL << 30) * 1.05; // Reduced from 4
+  constexpr static uint32_t kNumKVPairs = 1 << 18; // Reduced 
 
   // Array.
-  constexpr static uint32_t kNumArrayEntries = 1 << 20; // 1 M entries.
+  constexpr static uint32_t kNumArrayEntries = 1 << 18; // 256 K entries.
   constexpr static uint32_t kArrayEntrySize = 4096;     // 4 K
+  // Total Array Size = 256K * 4KB = 1GB. Fits in 2GB FarMem.
 
   // Runtime.
   constexpr static uint32_t kNumMutatorThreads = 8;
@@ -311,12 +312,17 @@ public:
   }
 
   void run() {
-    BUG_ON(madvise(all_gen_reqs, sizeof(Req) * kNumReqs, MADV_HUGEPAGE) != 0);
+    std::cout << "Starting run()" << std::endl;
+    if (madvise(all_gen_reqs, sizeof(Req) * kNumReqs, MADV_HUGEPAGE) != 0) {
+        std::cerr << "Madvise failed" << std::endl;
+    }
     // Use DRAMDevice instead of TCPDevice.
+    std::cout << "Building manager..." << std::endl;
     std::unique_ptr<FarMemManager> manager =
         std::unique_ptr<FarMemManager>(FarMemManagerFactory::build(
             kCacheSize, kNumGCThreads,
             new DRAMDevice(kFarMemSize)));
+    std::cout << "Manager built. Doing work..." << std::endl;
     do_work(manager.get());
   }
 };
