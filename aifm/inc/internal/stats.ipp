@@ -45,6 +45,11 @@ FORCE_INLINE void Stats::finish_measure_read_object_cycles() {
 #ifdef MONITOR_READ_OBJECT_CYCLES
   helpers::timer_end(&read_object_cycles_high_end_,
                      &read_object_cycles_low_end_);
+  auto delta = helpers::get_elapsed_cycles(
+      read_object_cycles_high_start_, read_object_cycles_low_start_,
+      read_object_cycles_high_end_, read_object_cycles_low_end_);
+  read_object_cycles_sum_ += delta;
+  read_object_ops_++;
 #endif
 }
 
@@ -65,6 +70,39 @@ FORCE_INLINE uint64_t Stats::get_elapsed_read_object_cycles() {
 #endif
 }
 
+FORCE_INLINE void Stats::reset_read_object_cycle_stats() {
+#ifdef MONITOR_READ_OBJECT_CYCLES
+  read_object_cycles_sum_ = 0;
+  read_object_ops_ = 0;
+#endif
+}
+
+FORCE_INLINE uint64_t Stats::get_total_read_object_cycles() {
+#ifdef MONITOR_READ_OBJECT_CYCLES
+  return read_object_cycles_sum_;
+#else
+  return 0;
+#endif
+}
+
+FORCE_INLINE uint64_t Stats::get_num_read_object_ops() {
+#ifdef MONITOR_READ_OBJECT_CYCLES
+  return read_object_ops_;
+#else
+  return 0;
+#endif
+}
+
+FORCE_INLINE double Stats::get_avg_read_object_cycles() {
+#ifdef MONITOR_READ_OBJECT_CYCLES
+  return read_object_ops_ ? static_cast<double>(read_object_cycles_sum_) /
+                                static_cast<double>(read_object_ops_)
+                          : 0.0;
+#else
+  return 0.0;
+#endif
+}
+
 FORCE_INLINE void Stats::start_measure_write_object_cycles() {
 #ifdef MONITOR_WRITE_OBJECT_CYCLES
   helpers::timer_start(&write_object_cycles_high_start_,
@@ -76,6 +114,11 @@ FORCE_INLINE void Stats::finish_measure_write_object_cycles() {
 #ifdef MONITOR_WRITE_OBJECT_CYCLES
   helpers::timer_end(&write_object_cycles_high_end_,
                      &write_object_cycles_low_end_);
+  auto delta = helpers::get_elapsed_cycles(
+      write_object_cycles_high_start_, write_object_cycles_low_start_,
+      write_object_cycles_high_end_, write_object_cycles_low_end_);
+  write_object_cycles_sum_ += delta;
+  write_object_ops_++;
 #endif
 }
 
@@ -93,6 +136,39 @@ FORCE_INLINE uint64_t Stats::get_elapsed_write_object_cycles() {
       write_object_cycles_high_end_, write_object_cycles_low_end_);
 #else
   return 0;
+#endif
+}
+
+FORCE_INLINE void Stats::reset_write_object_cycle_stats() {
+#ifdef MONITOR_WRITE_OBJECT_CYCLES
+  write_object_cycles_sum_ = 0;
+  write_object_ops_ = 0;
+#endif
+}
+
+FORCE_INLINE uint64_t Stats::get_total_write_object_cycles() {
+#ifdef MONITOR_WRITE_OBJECT_CYCLES
+  return write_object_cycles_sum_;
+#else
+  return 0;
+#endif
+}
+
+FORCE_INLINE uint64_t Stats::get_num_write_object_ops() {
+#ifdef MONITOR_WRITE_OBJECT_CYCLES
+  return write_object_ops_;
+#else
+  return 0;
+#endif
+}
+
+FORCE_INLINE double Stats::get_avg_write_object_cycles() {
+#ifdef MONITOR_WRITE_OBJECT_CYCLES
+  return write_object_ops_ ? static_cast<double>(write_object_cycles_sum_) /
+                                 static_cast<double>(write_object_ops_)
+                           : 0.0;
+#else
+  return 0.0;
 #endif
 }
 } // namespace far_memory

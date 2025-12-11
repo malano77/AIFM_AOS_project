@@ -10,8 +10,10 @@ for local_rams in "${local_rams[@]}"
 do
     sed "s/constexpr uint64_t kCacheSize = .*/constexpr uint64_t kCacheSize = $local_rams \* Region::kSize;/g" main.cpp -i
     make clean
-    make -j
+    # make -j
+    CXXFLAGS="-DMONITOR_READ_OBJECT_CYCLES -DMONITOR_WRITE_OBJECT_CYCLES" make -j
     rerun_local_iokerneld_noht
+    # rerun_mem_server
     run_program_noht ./main 1>log.$local_rams 2>&1 &
     ( tail -f -n0 log.$local_rams & ) | grep -q "Force existing..."
     sudo pkill -9 main

@@ -28,6 +28,8 @@ private:
   static unsigned read_object_cycles_low_start_;
   static unsigned read_object_cycles_high_end_;
   static unsigned read_object_cycles_low_end_;
+  static uint64_t read_object_cycles_sum_;
+  static uint64_t read_object_ops_;
 #endif
 
 #ifdef MONITOR_WRITE_OBJECT_CYCLES
@@ -35,6 +37,8 @@ private:
   static unsigned write_object_cycles_low_start_;
   static unsigned write_object_cycles_high_end_;
   static unsigned write_object_cycles_low_end_;
+  static uint64_t write_object_cycles_sum_;
+  static uint64_t write_object_ops_;
 #endif
 
   static void _add_free_mem_ratio_record();
@@ -83,10 +87,18 @@ public:                                                                        \
   static void finish_measure_read_object_cycles();
   static void reset_measure_read_object_cycles();
   static uint64_t get_elapsed_read_object_cycles();
+  static void reset_read_object_cycle_stats();
+  static uint64_t get_total_read_object_cycles();
+  static uint64_t get_num_read_object_ops();
+  static double get_avg_read_object_cycles();
   static void start_measure_write_object_cycles();
   static void finish_measure_write_object_cycles();
   static void reset_measure_write_object_cycles();
   static uint64_t get_elapsed_write_object_cycles();
+  static void reset_write_object_cycle_stats();
+  static uint64_t get_total_write_object_cycles();
+  static uint64_t get_num_write_object_ops();
+  static double get_avg_write_object_cycles();
 };
 } // namespace far_memory
 

@@ -10,6 +10,7 @@ extern "C" {
 #include "helpers.hpp"
 #include "hotness_tracker.hpp"
 #include "manager.hpp"
+#include "stats.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -110,6 +111,22 @@ void fm_compress_files_bench(const string &in_file_path,
        << " µs" << endl;
 
   // write_file_to_string(out_file_path, out_str);
+#ifdef MONITOR_WRITE_OBJECT_CYCLES
+  auto write_ops = Stats::get_num_write_object_ops();
+  auto total_write_cycles = Stats::get_total_write_object_cycles();
+  double avg_write_cycles = Stats::get_avg_write_object_cycles();
+  std::cout << "[Stats] write_ops=" << write_ops
+            << " total_write_cycles=" << total_write_cycles
+            << " avg_write_cycles=" << avg_write_cycles << std::endl;
+#endif
+#ifdef MONITOR_READ_OBJECT_CYCLES
+  auto read_ops = Stats::get_num_read_object_ops();
+  auto total_read_cycles = Stats::get_total_read_object_cycles();
+  double avg_read_cycles = Stats::get_avg_read_object_cycles();
+  std::cout << "[Stats] read_ops=" << read_ops
+            << " total_read_cycles=" << total_read_cycles
+            << " avg_read_cycles=" << avg_read_cycles << std::endl;
+#endif
 }
 
 void do_work() {
@@ -120,6 +137,8 @@ void do_work() {
         manager->allocate_array_heap<snappy::FileBlock,
                                      kUncompressedFileNumBlocks>());
   }
+  Stats::reset_read_object_cycle_stats();
+  Stats::reset_write_object_cycle_stats();
   fm_compress_files_bench("/mnt/enwik9.uncompressed",
                           "/mnt/enwik9.compressed.tmp");
   HotnessTracker::dump("snappy_fig11a");

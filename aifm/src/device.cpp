@@ -342,7 +342,7 @@ void DRAMDevice::set_local_region(uint8_t *base) {
 }
 
 void DRAMDevice::read_object(uint8_t ds_id, uint8_t obj_id_len, const uint8_t *obj_id, uint16_t *data_len, uint8_t *data_buf) {
-    // Stats::start_measure_read_object_cycles();
+    Stats::start_measure_read_object_cycles();
 
 	BUG_ON(obj_id_len != sizeof(uint64_t));
 	uint64_t remote_offset;
@@ -364,11 +364,11 @@ void DRAMDevice::read_object(uint8_t ds_id, uint8_t obj_id_len, const uint8_t *o
 		__builtin_memcpy(data_buf, src, len);
 	}
     
-	// Stats::finish_measure_read_object_cycles();
+	Stats::finish_measure_read_object_cycles();
 }
 
 void DRAMDevice::write_object(uint8_t /*ds_id*/, uint8_t obj_id_len, const uint8_t *obj_id, uint16_t data_len, const uint8_t *data_buf) {  
-	// Stats::start_measure_write_object_cycles();
+	Stats::start_measure_write_object_cycles();
 
 	BUG_ON(obj_id_len != sizeof(uint64_t));
 	uint64_t remote_offset;
@@ -383,7 +383,7 @@ void DRAMDevice::write_object(uint8_t /*ds_id*/, uint8_t obj_id_len, const uint8
 		sizes_[remote_offset] = data_len;
 	}
 
-	// Stats::finish_measure_write_object_cycles();
+	Stats::finish_measure_write_object_cycles();
 }
 
 bool DRAMDevice::remove_object(uint64_t /*ds_id*/, uint8_t obj_id_len, const uint8_t *obj_id) {

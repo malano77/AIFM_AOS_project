@@ -16,6 +16,8 @@ unsigned Stats::read_object_cycles_high_start_;
 unsigned Stats::read_object_cycles_low_start_;
 unsigned Stats::read_object_cycles_high_end_;
 unsigned Stats::read_object_cycles_low_end_;
+uint64_t Stats::read_object_cycles_sum_;
+uint64_t Stats::read_object_ops_;
 #endif
 
 #ifdef MONITOR_WRITE_OBJECT_CYCLES
@@ -23,6 +25,8 @@ unsigned Stats::write_object_cycles_high_start_;
 unsigned Stats::write_object_cycles_low_start_;
 unsigned Stats::write_object_cycles_high_end_;
 unsigned Stats::write_object_cycles_low_end_;
+uint64_t Stats::write_object_cycles_sum_;
+uint64_t Stats::write_object_ops_;
 #endif
 
 void Stats::_add_free_mem_ratio_record() {
