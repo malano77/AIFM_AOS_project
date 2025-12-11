@@ -8,7 +8,9 @@ extern "C" {
 #include "deref_scope.hpp"
 #include "device.hpp"
 #include "helpers.hpp"
+#include "hotness_tracker.hpp"
 #include "manager.hpp"
+#include "stats.hpp"
 
 #include <algorithm>
 #include <array>
@@ -115,6 +117,21 @@ public:
     }
 
     std::cout << "Passed" << std::endl;
+    HotnessTracker::dump("test_array_clock_replacement");
+    HotnessTracker::reset();
+#ifdef MONITOR_READ_OBJECT_CYCLES
+    std::cout << "[Stats] read_ops=" << Stats::get_num_read_object_ops()
+              << " total_read_cycles=" << Stats::get_total_read_object_cycles()
+              << " avg_read_cycles=" << Stats::get_avg_read_object_cycles()
+              << std::endl;
+#endif
+#ifdef MONITOR_WRITE_OBJECT_CYCLES
+    std::cout << "[Stats] write_ops=" << Stats::get_num_write_object_ops()
+              << " total_write_cycles="
+              << Stats::get_total_write_object_cycles()
+              << " avg_write_cycles=" << Stats::get_avg_write_object_cycles()
+              << std::endl;
+#endif
   }
 };
 } // namespace far_memory
@@ -122,13 +139,15 @@ public:
 void do_work(FarMemManager *manager) {
   cout << "Running " << __FILE__ "..." << endl;
   auto test = std::make_unique<FarMemTest>();
+  Stats::reset_read_object_cycle_stats();
+  Stats::reset_write_object_cycle_stats();
   test->run(manager);
 }
 
 void _main(void *arg) {
   std::unique_ptr<FarMemManager> manager =
       std::unique_ptr<FarMemManager>(FarMemManagerFactory::build(
-          kCacheSize, kNumGCThreads, new FakeDevice(kFarMemSize)));
+          kCacheSize, kNumGCThreads, new DRAMDevice(kFarMemSize)));
   do_work(manager.get());
 }
 
