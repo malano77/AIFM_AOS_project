@@ -289,7 +289,7 @@ void do_work(netaddr raddr) {
   }
   fm_compress_files_bench("/mnt/enwik9.uncompressed",
                           "/mnt/enwik9.compressed.tmp");
-  HotnessTracker::dump_top("snappy_fig11a");
+  HotnessTracker::dump("snappy_fig11a");
   HotnessTracker::reset();
 
   std::cout << "Force existing..." << std::endl;
