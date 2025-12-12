@@ -20,7 +20,8 @@ using namespace std;
 constexpr uint64_t kCacheSize = 512 * Region::kSize;
 constexpr uint64_t kFarMemSize = (1ULL << 34); // 16 GB.
 constexpr uint64_t kNumGCThreads = 12;
-constexpr uint64_t kNumEntries = 256 << 20; // 256 million entries.
+// Keep the workload reasonable for DRAMDevice runs.
+constexpr uint64_t kNumEntries = 1 << 20; // 1 million entries.
 constexpr uint64_t kNumElementsPerScope = 1024;
 
 namespace far_memory {
