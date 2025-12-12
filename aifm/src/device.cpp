@@ -387,9 +387,9 @@ void DRAMDevice::write_object(uint8_t /*ds_id*/, uint8_t obj_id_len, const uint8
 }
 
 bool DRAMDevice::remove_object(uint64_t /*ds_id*/, uint8_t obj_id_len, const uint8_t *obj_id) {
-	BUG_ON(obj_id_len != sizeof(uint64_t));
-	uint64_t remote_offset;
-	__builtin_memcpy(&remote_offset, obj_id, sizeof(remote_offset));
+	BUG_ON(obj_id_len == 0 || obj_id_len > sizeof(uint64_t));
+	uint64_t remote_offset = 0;
+	__builtin_memcpy(&remote_offset, obj_id, obj_id_len);
 
 	rt::ScopedLock l(&sizes_mu_);
 	return sizes_.erase(remote_offset) != 0;
