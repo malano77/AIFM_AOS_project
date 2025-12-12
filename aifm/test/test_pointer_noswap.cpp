@@ -60,7 +60,7 @@ void _main(void *arg) {
   uint8_t num_gc_threads = 12;
 
   auto manager = std::unique_ptr<FarMemManager>(FarMemManagerFactory::build(
-      cache_size, num_gc_threads, new FakeDevice(far_mem_size)));
+      cache_size, num_gc_threads, new DRAMDevice(far_mem_size)));
   do_work(manager.get());
 }
 

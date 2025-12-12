@@ -68,8 +68,8 @@ public:
             9.95) < 1E-5);
 
     cout << "Passed" << endl;
-    HotnessTracker::dump("test_csv_reader");
-    HotnessTracker::reset();
+    // HotnessTracker::dump("test_csv_reader");
+    // HotnessTracker::reset();
 #ifdef MONITOR_READ_OBJECT_CYCLES
     std::cout << "[Stats] read_ops=" << Stats::get_num_read_object_ops()
               << " total_read_cycles=" << Stats::get_total_read_object_cycles()

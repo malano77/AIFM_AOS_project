@@ -117,8 +117,8 @@ public:
     }
 
     std::cout << "Passed" << std::endl;
-    HotnessTracker::dump("test_array_clock_replacement");
-    HotnessTracker::reset();
+    // HotnessTracker::dump("test_array_clock_replacement");
+    // HotnessTracker::reset();
 #ifdef MONITOR_READ_OBJECT_CYCLES
     std::cout << "[Stats] read_ops=" << Stats::get_num_read_object_ops()
               << " total_read_cycles=" << Stats::get_total_read_object_cycles()

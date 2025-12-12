@@ -75,7 +75,7 @@ fail:
 
 void _main(void *arg) {
   auto manager = std::unique_ptr<FarMemManager>(FarMemManagerFactory::build(
-      kCacheSize, kNumGCThreads, new FakeDevice(kFarMemSize)));
+      kCacheSize, kNumGCThreads, new DRAMDevice(kFarMemSize)));
   do_work(manager.get());
 }
 

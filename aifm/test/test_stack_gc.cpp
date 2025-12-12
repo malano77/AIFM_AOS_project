@@ -57,7 +57,7 @@ public:
 void _main(void *arg) {
   std::unique_ptr<FarMemManager> manager =
       std::unique_ptr<FarMemManager>(FarMemManagerFactory::build(
-          kCacheSize, kNumGCThreads, new FakeDevice(kFarMemSize)));
+          kCacheSize, kNumGCThreads, new DRAMDevice(kFarMemSize)));
   FarMemTest test;
   test.do_work(manager.get());
 }

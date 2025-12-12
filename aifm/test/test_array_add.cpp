@@ -75,8 +75,8 @@ void do_work(FarMemManager *manager) {
   }
 
   cout << "Passed" << endl;
-  HotnessTracker::dump("test_array_add");
-  HotnessTracker::reset();
+  // HotnessTracker::dump("test_array_add");
+  // HotnessTracker::reset();
 #ifdef MONITOR_READ_OBJECT_CYCLES
   std::cout << "[Stats] read_ops=" << Stats::get_num_read_object_ops()
             << " total_read_cycles=" << Stats::get_total_read_object_cycles()
@@ -93,8 +93,8 @@ void do_work(FarMemManager *manager) {
 
 fail:
   cout << "Failed" << endl;
-  HotnessTracker::dump("test_array_add");
-  HotnessTracker::reset();
+  // HotnessTracker::dump("test_array_add");
+  // HotnessTracker::reset();
   return;
 }
 
