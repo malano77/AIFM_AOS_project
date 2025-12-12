@@ -19,7 +19,7 @@ using namespace std;
 constexpr static uint32_t kNumThreads = 23;
 constexpr static uint32_t kKeyMaxLen = 5;
 constexpr static uint32_t kValMaxLen = 10;
-constexpr static uint32_t kHashTableNumEntriesShift = 19;
+constexpr static uint32_t kHashTableNumEntriesShift = 12;
 constexpr static uint32_t kHashTableRemoteDataSize =
     (Object::kHeaderSize + kKeyMaxLen + kValMaxLen) *
     (1 << kHashTableNumEntriesShift) * kNumThreads;

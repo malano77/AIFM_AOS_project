@@ -16,9 +16,9 @@ extern "C" {
 using namespace far_memory;
 using namespace std;
 
-constexpr static uint32_t kKeyLen = 200;
-constexpr static uint32_t kValueLen = 700;
-constexpr static uint32_t kHashTableNumEntriesShift = 16;
+constexpr static uint32_t kKeyLen = 32;
+constexpr static uint32_t kValueLen = 64;
+constexpr static uint32_t kHashTableNumEntriesShift = 12;
 constexpr static uint32_t kHashTableRemoteDataSize =
     (Object::kHeaderSize + kKeyLen + kValueLen) *
     (1 << kHashTableNumEntriesShift);
