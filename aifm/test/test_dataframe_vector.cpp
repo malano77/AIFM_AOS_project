@@ -17,13 +17,11 @@ extern "C" {}
 using namespace far_memory;
 using namespace std;
 
-// Keep cache/far-mem small to avoid exhausting local DRAM with DRAMDevice.
-constexpr uint64_t kCacheSize = 128 * Region::kSize;      // 128 MB
-constexpr uint64_t kFarMemSize = (512ULL << 20);          // 512 MB
-constexpr uint64_t kNumGCThreads = 2;
-// Keep the workload very small for DRAMDevice runs.
-constexpr uint64_t kNumEntries = 1 << 10; // 1k entries
-constexpr uint64_t kNumElementsPerScope = 64;
+constexpr uint64_t kCacheSize = 512 * Region::kSize;
+constexpr uint64_t kFarMemSize = (1ULL << 34); // 16 GB.
+constexpr uint64_t kNumGCThreads = 12;
+constexpr uint64_t kNumEntries = 256 << 20; // 256 million entries.
+constexpr uint64_t kNumElementsPerScope = 1024;
 
 namespace far_memory {
 class FarMemTest {
@@ -244,7 +242,7 @@ public:
 
 void _main(void *arg) {
   auto manager = std::unique_ptr<FarMemManager>(FarMemManagerFactory::build(
-      kCacheSize, kNumGCThreads, new DRAMDevice(kFarMemSize)));
+      kCacheSize, kNumGCThreads, new FakeDevice(kFarMemSize)));
   FarMemTest test;
   test.do_work(manager.get());
 }
