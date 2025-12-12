@@ -344,7 +344,7 @@ void DRAMDevice::set_local_region(uint8_t *base) {
 void DRAMDevice::read_object(uint8_t ds_id, uint8_t obj_id_len, const uint8_t *obj_id, uint16_t *data_len, uint8_t *data_buf) {
     Stats::start_measure_read_object_cycles();
 
-	BUG_ON(obj_id_len != sizeof(uint64_t));
+	BUG_ON(obj_id_len == 0 || obj_id_len > sizeof(uint64_t));
 	uint64_t remote_offset;
 	__builtin_memcpy(&remote_offset, obj_id, sizeof(remote_offset));
 	BUG_ON(!local_region_base_);
@@ -370,7 +370,7 @@ void DRAMDevice::read_object(uint8_t ds_id, uint8_t obj_id_len, const uint8_t *o
 void DRAMDevice::write_object(uint8_t /*ds_id*/, uint8_t obj_id_len, const uint8_t *obj_id, uint16_t data_len, const uint8_t *data_buf) {  
 	Stats::start_measure_write_object_cycles();
 
-	BUG_ON(obj_id_len != sizeof(uint64_t));
+	BUG_ON(obj_id_len == 0 || obj_id_len > sizeof(uint64_t));
 	uint64_t remote_offset;
 	__builtin_memcpy(&remote_offset, obj_id, sizeof(remote_offset));
 	BUG_ON(!local_region_base_);
